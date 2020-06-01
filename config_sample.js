@@ -1,5 +1,5 @@
 module.exports = {
-    db: "mongo-connection-uri"
+    db: "mongo-connection-uri",
     auth: {
         github: {
             client_id: "",

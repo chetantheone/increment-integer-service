@@ -10,5 +10,5 @@ Steps to run:
 2. Copy config_sample.js and create config.js.
 3. Add db url, port no and other informations.
 3. Run `npm install`
-4. run `node app.js`
+4. run `node app.js` ( for production run `npm start`)
 5. Use github login
