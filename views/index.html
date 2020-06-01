@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <title>Counter Service</title>
+</head>
+<body>
+    <div class="jumbotron">
+        <h1 class="display-4">Your counter integer value</h1>
+        <p class="lead">This is the sample app which allow to get unqiue incremenetal integer value per user</p>
+        <hr class="my-4">
+
+        {{#if auth}}
+
+        <button class="btn btn-danger logout float-right"> Logout</button>
+        <div class="spinner-border loader" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div id="main-section" style="display: none;">
+            <div>
+                <p>Hello {{name}}, Your current integer is <span id="current-value">0</span></p>
+            </div>
+            <hr class="my-4">
+            <a class="btn btn-primary btn-lg next-integer" href="#" role="button">Get Next Integer</a>
+            <hr class="my-4">
+            <form class="mt-2 set-current">
+                <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label class="sr-only" for="integer-val">New Integer value to set</label>
+                    <input type="number" class="form-control mb-2" min="0" id="integer-val" placeholder="Add your integer value" required>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                </div>
+                </div>
+            </form>
+        </div>
+        {{else}}
+        <a class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id={{client_id}}">
+            Login with github
+        </a>
+        {{/if}}
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script>
+
+        (function(){
+            var isAuth = {{auth}};
+            function getNextValue() {
+                showLoader();
+                $.post('/next', function(response) {
+                    hideLoader();
+
+                    if (response.status == false) {
+                        return alert("Error: "+ response.error.message );
+                    }
+
+                    $("#current-value").text( response.data.counter );
+                });
+            }
+
+            function setCurrentValue( e ) {
+                e.preventDefault();
+                showLoader();
+                $.post('/set', {
+                    current: $("#integer-val").val()
+                }, function(response) {
+                    hideLoader();
+
+                    if (response.status == false) {
+                        return alert("Error: "+ response.error.message );
+                    }
+
+                    $("#current-value").text( response.data.counter );
+                });
+            }
+
+            function logout( e ) {
+                showLoader();
+                $.post('/logout', {
+                }, function(response) {
+                    hideLoader();
+                    window.location.href = "/";
+                });
+            }
+
+            function getCurretInteger() {
+                showLoader();
+                $.getJSON('/current', function(response) {
+                    hideLoader();
+
+                    if (response.status == false) {
+                        return alert("Error: "+ response.error.message );
+                    }
+
+                    $("#current-value").text( response.data.counter );
+                });
+            }
+
+            function showLoader() {
+                $(".loader").show();
+                $("#main-section").hide(); 
+            }
+
+            function hideLoader() {
+                $(".loader").hide();
+                $("#main-section").show(); 
+            }
+
+            function onDocReady() {
+
+                if( !isAuth ) {
+                    return;
+                }
+                getCurretInteger();
+
+                $(".next-integer").on("click", getNextValue );
+                $(".set-current").on("submit", setCurrentValue );
+                $(".logout").on("click", logout );
+            }
+            hideLoader();
+            $(document).ready(onDocReady );
+        })();
+    </script>
+</body>
+
+</html>
